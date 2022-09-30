@@ -1,21 +1,13 @@
-FROM alpine:3.6
-MAINTAINER Mohammad Abdoli Rad <m.abdolirad@gmail.com>
+FROM amd64/alpine:3.15.6
+MAINTAINER Yechan Kim <kycfeel@gmail.com>
 
-LABEL org.label-schema.name="shadowsocks-server" \
-        org.label-schema.vendor="Dockage" \
-        org.label-schema.description="Shadowsocks server Docker image, A secure socks5 proxy, designed to protect your Internet traffic." \
-        org.label-schema.vcs-url="https://github.com/dockage/shadowsocks-server" \
-        org.label-schema.license="MIT"
+# Download shadowsocks and dependencies
+RUN apk add  --allow-untrusted --update mbedtls openssl wget libressl libressl-dev --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main && \
+    apk add  --allow-untrusted --update shadowsocks-libev --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
-ENV SS_SERVER_ADDR=0.0.0.0 \
-    SS_SERVER_PORT=8388 \
-    SS_PASSWORD=ssp@ss \
-    SS_METHOD=aes-256-cfb \
-    SS_TIMEOUT=300
-
-RUN apk add --update --no-cache --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/main/ --allow-untrusted libressl2.6-libcrypto libsodium \
-    && apk add --no-cache --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --allow-untrusted shadowsocks-libev
-
-EXPOSE ${SS_SERVER_PORT}/tcp ${SS_SERVER_PORT}/udp
+# Download the v2ray plugin
+RUN wget https://github.com/shadowsocks/v2ray-plugin/releases/download/v1.3.2/v2ray-plugin-linux-amd64-v1.3.2.tar.gz && \
+    tar -xvf v2ray-plugin-linux-amd64-v1.3.2.tar.gz && \
+    mv v2ray-plugin_linux_amd64 /usr/bin/v2ray-plugin
 
 ENTRYPOINT /usr/bin/ss-server -s ${SS_SERVER_ADDR} -p ${SS_SERVER_PORT} -k ${SS_PASSWORD} -m ${SS_METHOD} -t ${SS_TIMEOUT}

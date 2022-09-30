@@ -1,7 +1,14 @@
 shadowsocks:
-  image: dockage/shadowsocks-server:latest
+  image: kycfeel/shadowsocks-server:latest
+  build:
+    context: .
+    dockerfile: Dockerfile
   ports:
-    - "8388:8388"
-  environment:
-    - SS_PASSWORD=ssp@ss
-    - SS_METHOD=aes-256-cfb
+    - "443:443"
+  volumes:
+    - ./shadowsocks-conf:/etc/shadowsocks-conf
+    - ./shadowsocks-certs:/etc/shadowsocks-certs
+  entrypoint: >
+    /bin/sh -c "
+    ss-server -c /etc/shadowsocks-conf/config.json
+    "
